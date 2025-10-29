@@ -1,29 +1,550 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panitia Ujian As-Syamsuri 2025</title>
-  <style>
-    body {
-      background: linear-gradient(to bottom right, #009688, #004d40);
-      color: #e0f2f1;
-      font-family: 'Poppins', sans-serif;
-      text-align: center;
-      padding: 40px;
-    }
-    h1 { font-size: 26px; margin-bottom: 10px; }
-    p { font-size: 15px; line-height: 1.6; }
-    img { width: 220px; border-radius: 10px; margin-top: 15px; }
-    footer { margin-top: 25px; font-size: 12px; color: #b2dfdb; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=1, minimum-scale=1, maximum-scale=5" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>Htmlku.com/nyambung</title>
+<meta name="description" content="Mini greeting page" />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Kamu juga punya cache font lokal: css2 & css2(1). Boleh pakai salah satu -->
+<link href="./asset/css2" rel="stylesheet" />
+<link href="./asset/css2(1)" rel="stylesheet" />
+
+<!-- Lib lokal -->
+<script src="./asset/sweetalert2.all.min.js"></script>
+<script src="./asset/index.umd.js"></script>
+
+<style>
+  :root{
+    --tombol-bg: rgba(0,0,0,.5);
+    --tombol-teks: #fff;
+    --tombol-bingkai: #fff;
+    --radius: 18px;
+    --font1: 'Itim', cursive;
+    --font2: 'Dancing Script', sans-serif;
+  }
+
+  /* Base */
+  html,body{height:100%}
+  body{
+    background:#000;
+    font-family:var(--font1);
+    color:#fff;
+    margin:0;
+    padding:20px 24px;
+    user-select:none;
+  }
+  a{text-decoration:none;color:inherit}
+
+  /* Watermark kecil */
+  body::before{
+    content:"© feeldream.id";
+    position:fixed; right:20px; bottom:20px; font-size:10px;
+    opacity:.2; z-index:2
+  }
+
+  /* Backdrop & wallpaper */
+  #bodyblur{position:fixed; inset:0; background:rgba(0,0,0,.30); opacity:0; transition:1s}
+  #wallpaper{width:100%; height:100%; object-fit:cover; transform:scale(2); transition:1.3s}
+  #beneranblur{position:fixed; inset:0; background:rgba(0,0,0,.30); backdrop-filter:blur(0px); transition:3s}
+
+  /* Content block */
+  #Content{position:relative; width:100%; max-width:690px; margin:35vh auto 0; opacity:1; transition:.7s}
+  #ket{margin-top:14px; font-weight:400}
+
+  /* Tombol LOVE awal */
+  #loveIn{display:flex; justify-content:center}
+  .lovein{
+    width:40px; height:40px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:#fff; color:#ff3366; font-size:22px; font-weight:700;
+    box-shadow:0 8px 28px rgba(255,255,255,.25);
+    transition:.25s;
+  }
+  .lovein:hover{transform:scale(.95)}
+
+  /* Stiker */
+  .kumpulanstiker > img{
+    display:none; width:85px; height:85px; padding:10px; margin:0;
+    background:rgba(255,255,255,.5);
+    border:2px solid #fff; border-radius:50%;
+    box-shadow:0 4px 30px rgba(255,255,255,.3);
+    backdrop-filter:blur(5px);
+  }
+  #fotostiker{opacity:.1; transform:scale(.1); transition:1.2s}
+
+  /* Sapaan */
+  .halo{font-size:20px; margin:16px 0 22px; text-shadow:0 2px 2px rgba(0,0,0,.8)}
+  .halo.sty2{font-family:var(--font2); font-size:24px}
+
+  /* Kartu pesan */
+  blockquote{
+    position:relative; margin:0 auto; margin-top:12px;
+    width:100%; max-width:640px;
+    background:rgba(0,0,0,.55);
+    border:2px solid #fff; border-radius:var(--radius);
+    color:#fff; text-align:center; padding:16px 20px;
+    box-shadow:0 7px 29px rgba(255,255,255,.3);
+    transform:scale(.98);
+    opacity:0; visibility:hidden; transition:1s;
+  }
+  blockquote[data-show="1"]{opacity:1; visibility:visible; transform:scale(1)}
+  blockquote p{margin:10px 0; line-height:1.5}
+  .sty2b{font-weight:600}
+  .left{text-align:left}
+
+  /* Baris 4 LOVE – rata & responsif */
+  #kolombaru{
+    display:flex; justify-content:center; gap:22px;
+    margin:10px 0 0;
+    opacity:0; transform:translateY(6px) scale(.98);
+    transition:.3s;
+  }
+  #kolombaru.show{opacity:1; transform:translateY(0) scale(1)}
+  #kolombaru li{
+    list-style:none; font-size:30px; cursor:pointer;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  #kolombaru li:hover{transform:scale(1.12)}
+  #kolombaru li.clicked{opacity:.2; transform:scale(.88); pointer-events:none}
+
+  /* Kolom Lanjut (tombol khusus di bawah pesan) */
+  #lanjutWrap{
+    display:none; justify-content:center; margin-top:16px;
+    transform:scale(.9); opacity:0; transition:.25s;
+  }
+  #lanjutWrap.show{display:flex; transform:scale(1); opacity:1}
+
+  #lanjutBtn{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:10px 16px; border-radius:var(--radius);
+    border:2px solid #fff; background:var(--tombol-bg);
+    color:var(--tombol-teks); font-weight:700; font-size:14px;
+    box-shadow:0 7px 29px rgba(255,255,255,.3);
+    cursor:pointer; outline:0; transition:transform .15s, box-shadow .15s;
+  }
+  #lanjutBtn:hover{transform:translateY(-1px)}
+  #lanjutBtn:active{transform:translateY(0) scale(.98)}
+  #lanjutBtn .dot{
+    width:8px; height:8px; border-radius:50%; background:#ff69b4;
+    box-shadow:0 0 0 0 rgba(255,105,180,.6); animation:pulse 1.4s infinite;
+  }
+  #lanjutBtn .chev{display:inline-block; transition:transform .25s}
+  #lanjutBtn:hover .chev{transform:translateX(4px)}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(255,105,180,.6)}
+    80%{box-shadow:0 0 0 12px rgba(255,105,180,0)}
+    100%{box-shadow:0 0 0 0 rgba(255,105,180,0)}
+  }
+
+  /* Tombol kirim WA */
+  #Tombol{display:flex; justify-content:center; opacity:0; transform:scale(.9); transition:1s; margin-top:10px}
+  #Tombol.show{opacity:1; transform:scale(1)}
+  #Tombol a{
+    display:inline-flex; padding:10px 14px; border:2px solid #fff; border-radius:var(--radius);
+    background:var(--tombol-bg); color:#fff; font-weight:700; font-size:12px;
+    box-shadow:0 7px 29px rgba(255,255,255,.3); cursor:pointer;
+  }
+
+  /* Pesan ditolak */
+  #pesanditolak{display:none; text-align:center}
+  #pesanditolak img{width:75px; height:75px}
+  #pesanditolak p{margin-top:8px}
+
+  /* Hidden awal: semua paragraf pesan—biar ga “kedip” sebelum TypeIt */
+  #pesan2,#pesan3,#pesan4,#pesan5,#pesan6,#pesan7,#pesan8{display:none}
+
+  /* SweetAlert2 – tema gelap + input terlihat */
+  .swal2-modal{
+    background:rgba(0,0,0,.6)!important; border:2px solid #fff; border-radius:var(--radius);
+    backdrop-filter:blur(3px); color:#fff; max-width:640px;
+  }
+  .swal2-title{color:#fff!important; font-size:28px}
+  .swal2-input{
+    background:rgba(255,255,255,.12)!important; border:2px solid rgba(255,255,255,.55)!important;
+    color:#fff!important; font-size:22px!important; border-radius:14px!important;
+  }
+  .swal2-input::placeholder{color:#ddd}
+  .swal2-styled{border-radius:14px!important; border:2px solid #fff!important}
+  .swal2-confirm{background:#7367f0!important}
+  .swal2-cancel{background:#ea5455!important}
+
+  /* Hujan hati */
+  .heart-icon{z-index:100; width:25px; height:25px; position:fixed; top:-10vh; animation:heartMove linear 1}
+  @keyframes heartMove{0%{transform:translateY(-10vh)}100%{transform:translateY(100vh)}}
+  svg.line{fill:none; stroke:#fff; stroke-width:2; animation:moving .7s linear infinite alternate}
+  .spin{animation:spin 3s linear infinite alternate}
+  @keyframes spin{from{transform:rotate(20deg)} to{transform:rotate(-20deg)}}
+
+  /* Background ring animent */
+  .wrapper{position:fixed}
+  .box div{position:fixed; width:60px; height:60px; border:6px solid rgba(255,255,255,.6); border-radius:50%; z-index:-10}
+  .box div:nth-child(1){top:12%; left:42%; animation:animate 10s linear infinite}
+  .box div:nth-child(2){top:70%; left:50%; animation:animate 7s linear infinite}
+  .box div:nth-child(3){top:17%; left:6%;  animation:animate 9s linear infinite}
+  .box div:nth-child(4){top:20%; left:60%; animation:animate 10s linear infinite}
+  .box div:nth-child(5){top:67%; left:10%; animation:animate 6s linear infinite}
+  .box div:nth-child(6){top:80%; left:70%; animation:animate 12s linear infinite}
+  .box div:nth-child(7){top:60%; left:80%; animation:animate 15s linear infinite}
+  .box div:nth-child(8){top:32%; left:25%; animation:animate 16s linear infinite}
+  .box div:nth-child(9){top:90%; left:25%; animation:animate 9s linear infinite}
+  .box div:nth-child(10){top:20%; left:80%; animation:animate 5s linear infinite}
+  @keyframes animate{
+    0%{transform:scale(0) translateY(0) rotate(0); opacity:.8}
+    100%{transform:scale(1.3) translateY(-90px) rotate(360deg); opacity:0}
+  }
+</style>
 </head>
+
 <body>
-  <h1>✨ Panitia Ujian As-Syamsuri 2025 ✨</h1>
-  <p>Status: <strong>Belum Tidur Sejak Rapat 😴</strong></p>
-  <p>Motto: <em>Kerja Ikhlas, Hasil Berkah.</em></p>
-  <img src="https://i.imgur.com/v7jFq8T.gif" alt="GIF Panitia">
-  <p>Terima kasih sudah scan QR ini 🙌</p>
-  <footer>© Panitia As-Syamsuri | 2025</footer>
+
+<!-- Audio (boleh ganti) -->
+<audio id="linkmp3" class="sembunyi" src="./asset/lagu.mp3"></audio>
+
+<!-- Backdrop & Wallpaper -->
+<div id="bodyblur">
+  <img id="wallpaper" src="./asset/wp3.jpeg" alt="wallpaper">
+  <div id="beneranblur"></div>
+</div>
+
+<!-- Konten -->
+<div id="Content">
+  <!-- Tombol LOVE pertama -->
+  <div id="loveIn"><a class="lovein">❤</a></div>
+  <p id="ket">Tap LOVEnya!</p>
+
+  <!-- Stiker -->
+  <div class="kumpulanstiker">
+    <img id="fotostiker"  src="./asset/pandapanah.gif" alt="">
+    <img id="fotostiker1" src="./asset/pusn.gif"        alt="">
+    <img id="fotostiker2" src="./asset/mikir.gif"       alt="">
+    <img id="fotostiker3" src="./asset/inicinta.gif"    alt="">
+    <img id="fotostiker4" src="./asset/cilukba.gif"     alt="">
+    <img id="fotostiker5" src="./asset/terlope.gif"     alt="">
+  </div>
+
+  <!-- Sapaan -->
+  <p id="halo" class="halo"></p>
+
+  <!-- Kartu Pesan -->
+  <blockquote id="bq" data-text="" data-show="0">
+    <p id="kalimat"></p>
+    <p id="kalimatb"></p>
+
+    <!-- Pesan yang bisa kamu edit -->
+    <p id="pesan1"><b style="font-size:18px">Klik 4 LOVE ini! 😆🤏</b></p>
+
+    <!-- 4 LOVE -->
+    <ul id="kolombaru">
+      <li id="lv1">💗</li>
+      <li id="lv2">💗</li>
+      <li id="lv3">💗</li>
+      <li id="lv4">💗</li>
+    </ul>
+
+    <!-- Lanjut pesan (edit bebas) -->
+    <p id="pesan2">Aku udah lama pengin bilang sesuatu… 🥺</p>
+    <p id="pesan3">Tapi janji ya, jangan diketawain 😝</p>
+    <p id="pesan4" class="sty2b left">🌙 “Semangat ya, panitia ujian Ponpes As-Syamsuri! Ingat, setiap keringat kalian jadi bagian dari keberkahan ilmu para santri.”</p>
+    <p id="pesan5" class="sty2b left">📖 “Capek boleh, tapi niatnya karena Allah. InsyaAllah setiap usaha kalian dihitung sebagai amal kebaikan.”</p>
+    <p id="pesan6" class="sty2b left">💪 “Kalian bukan cuma panitia ujian — tapi juga penjaga semangat ilmu. Tanpa kalian, suasana ujian gak akan seindah ini.”</p>
+    <p id="pesan7" class="sty2b left">🌟 “Terus semangat sampai akhir! Doa para santri, guru, dan seluruh pondok selalu menyertai langkah kalian.”</p>
+    <p id="pesan8" class="sty2b left">Mau jawab jujur? 😳👉👈</p>
+
+    <!-- Kolom Lanjut -->
+    <div id="lanjutWrap">
+      <button id="lanjutBtn" type="button" aria-label="Lanjut">
+        <span class="dot"></span>
+        <span class="text">Klik untuk Lanjut</span>
+        <span class="chev">➜</span>
+      </button>
+    </div>
+  </blockquote>
+
+  <!-- Tombol kirim WA -->
+  <div id="Tombol"><a id="By">💌 Balas</a></div>
+
+  <!-- Pesan Ditolak -->
+  <div id="pesanditolak">
+    <img id="stikerditolak" src="./asset/weee.gif" alt="">
+    <p id="kataditolak">Yaudah kalo ga kangen mh 😜</p>
+  </div>
+</div>
+
+<!-- Ring background anim -->
+<div class="wrapper">
+  <div class="box">
+    <div></div><div></div><div></div><div></div><div></div>
+    <div></div><div></div><div></div><div></div><div></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // Helpers SweetAlert
+  const swalToast = Swal.mixin({timer:2300, allowOutsideClick:false, showConfirmButton:false, timerProgressBar:true, imageHeight:90});
+  const swals     = Swal.mixin({allowOutsideClick:false, cancelButtonColor:'#FF0040', imageHeight:80});
+
+  // Dom refs
+  const body = document.body;
+  const audio = new Audio(document.getElementById('linkmp3').src);
+  const wallpaper = document.getElementById('wallpaper');
+  const bodyblur = document.getElementById('bodyblur');
+  const loveIn = document.getElementById('loveIn');
+  const ket = document.getElementById('ket');
+  const Content = document.getElementById('Content');
+  const fotostiker  = document.getElementById('fotostiker');
+  const fotostiker1 = document.getElementById('fotostiker1');
+  const fotostiker2 = document.getElementById('fotostiker2');
+  const fotostiker3 = document.getElementById('fotostiker3');
+  const fotostiker4 = document.getElementById('fotostiker4');
+  const fotostiker5 = document.getElementById('fotostiker5');
+
+  const halo = document.getElementById('halo');
+  const bq = document.getElementById('bq');
+  const kalimat = document.getElementById('kalimat');
+
+  const kolombaru = document.getElementById('kolombaru');
+  const lv1 = document.getElementById('lv1');
+  const lv2 = document.getElementById('lv2');
+  const lv3 = document.getElementById('lv3');
+  const lv4 = document.getElementById('lv4');
+
+  const lanjutWrap = document.getElementById('lanjutWrap');
+  const lanjutBtn  = document.getElementById('lanjutBtn');
+  const tombolWA = document.getElementById('Tombol');
+  const btnBy = document.getElementById('By');
+
+  const stikerditolak = document.getElementById('stikerditolak');
+  const kataditolak = document.getElementById('kataditolak');
+
+  // State
+  let nama = '';
+  let teksWelcome = '';
+  let ftIndex = 0;
+  let opsLclick = 0;
+  let opsLstep  = 0;
+  let loveCount = 0;
+  let pesanwhatsapp = '';
+
+  // Utility
+  function setSticker(i){
+    const list = [fotostiker, fotostiker1, fotostiker2, fotostiker3, fotostiker4, fotostiker5];
+    const pick = list[Math.max(0, Math.min(i, list.length-1))];
+    fotostiker.src = pick.src;
+    fotostiker.style.display = 'inline-flex';
+    fotostiker.style.opacity = '1';
+    fotostiker.style.transform = 'scale(1)';
+  }
+  function hideSticker(){
+    fotostiker.style.transition = '.7s';
+    fotostiker.style.transform = 'scale(.1)';
+    fotostiker.style.opacity = '1';
+  }
+
+  function showCard(){
+    bq.setAttribute('data-show', '1');
+  }
+
+  function showLanjut(text){
+    if (text) document.querySelector('#lanjutBtn .text').textContent = text;
+    lanjutWrap.style.display = 'flex';
+    requestAnimationFrame(()=>lanjutWrap.classList.add('show'));
+    opsLclick = 1;
+  }
+  function hideLanjut(){
+    lanjutWrap.classList.remove('show');
+    setTimeout(()=>{lanjutWrap.style.display='none'}, 200);
+    opsLclick = 0;
+  }
+
+  function startType(el, done){
+    const s = el.innerHTML; el.innerHTML = ''; el.style.display='block';
+    new TypeIt('#'+el.id, {
+      strings:[s], startDelay: 10, speed: 32, cursor:true, deleteSpeed:20,
+      breakLines:false, waitUntilVisible:true, lifelike:true,
+      afterComplete: () => { el.innerHTML = s; done && done(); }
+    }).go();
+  }
+
+  function welcome(){ teksWelcome = `Hai, ${nama} ✨`; }
+
+  // Alur awal
+  loveIn.addEventListener('click', async () => {
+    // mainkan
+    try{ audio.play().catch(()=>{}); }catch(e){}
+    loveIn.style.transform = 'scale(15)'; loveIn.style.opacity = '0';
+    ket.style.display = 'none';
+    wallpaper.style.transform = 'scale(1.5)';
+    bodyblur.style.opacity = '.7';
+    Content.style.marginTop = '30px';
+
+    // tanya nama
+    const r = await swals.fire({
+      title: 'Masukin Nama Kamu 😊💐',
+      input: 'text',
+      inputPlaceholder: 'ketik di sini…',
+      inputAttributes:{ maxlength: 10 },
+      confirmButtonText: 'OK'
+    });
+    const val = (r && r.value || '').trim();
+    if(!val || val.length>10){
+      await swals.fire('Ups!', 'Nama tidak boleh kosong atau lebih dari 10 karakter, ya!');
+      location.reload(); return;
+    }
+    nama = val;
+    welcome();
+
+    // tampil halo + kartu
+    setSticker(0);
+    new TypeIt('#halo', {
+      strings:[teksWelcome], startDelay: 50, speed: 30, waitUntilVisible:true,
+      afterComplete: () => {
+        halo.textContent = teksWelcome;
+        showCard();
+        step1();
+      }
+    }).go();
+  });
+
+  // STEP 1 – tampil pesan1 + love row
+  function step1(){
+    kalimat.style.opacity = '1';
+    kalimat.innerHTML = document.getElementById('pesan1').innerHTML;
+    kolombaru.classList.add('show');
+    showLanjut('Klik LOVE-nya (4x)');
+    opsLstep = 1;
+  }
+
+  // Klik LOVE
+  function markLove(li){
+    if(li.classList.contains('clicked')) return;
+    li.classList.add('clicked');
+    loveCount++;
+    if(loveCount === 1){ hideSticker(); ftIndex=1; setTimeout(()=>setSticker(ftIndex), 250); }
+    if(loveCount >= 4){
+      kolombaru.classList.remove('show');
+      hideLanjut();
+      setTimeout(step2, 350);
+    }
+  }
+  [lv1,lv2,lv3,lv4].forEach(li=>li.addEventListener('click', ()=>markLove(li)));
+
+  // STEP 2 – pesan2 & pesan3 ketik berurutan, lalu lanjut
+  function step2(){
+    wallpaper.style.transform = 'scale(1)';
+    kalimat.innerHTML = '';
+    const p2 = document.getElementById('pesan2');
+    const p3 = document.getElementById('pesan3');
+
+    startType(p2, () => {
+      startType(p3, () => {
+        kalimat.innerHTML = p3.innerHTML;
+        opsLstep = 2;
+        showLanjut('Lanjut');
+      });
+    });
+  }
+
+  // STEP 3 – pesan4
+  function step3(){
+    hideSticker(); ftIndex=2; setTimeout(()=>setSticker(ftIndex), 300);
+    const p4 = document.getElementById('pesan4');
+    startType(p4, () => { opsLstep = 3; showLanjut('Lanjut'); });
+  }
+
+  // STEP 4 – pesan5
+  function step4(){
+    hideSticker(); ftIndex=2; setTimeout(()=>setSticker(ftIndex), 300);
+    const p5 = document.getElementById('pesan5');
+    startType(p5, () => { opsLstep = 4; showLanjut('Lanjut'); });
+  }
+
+  // STEP 5 – pesan6
+  function step5(){
+    hideSticker(); ftIndex=3; setTimeout(()=>setSticker(ftIndex), 300);
+    const p6 = document.getElementById('pesan6');
+    startType(p6, () => { opsLstep = 5; showLanjut('Lanjut'); });
+  }
+
+  // STEP 6 – pesan7
+  function step6(){
+    hideSticker(); ftIndex=4; setTimeout(()=>setSticker(ftIndex), 300);
+    const p7 = document.getElementById('pesan7');
+    startType(p7, () => { opsLstep = 6; showLanjut('Lanjut'); });
+  }
+
+  // STEP 7 – pesan8 + tombol WA + hujan hati
+  function step7(){
+    hideSticker(); ftIndex=5; setTimeout(()=>setSticker(ftIndex), 300);
+    const p8 = document.getElementById('pesan8');
+    startType(p8, () => {
+      hideLanjut();
+      tombolWA.classList.add('show');
+      setInterval(rainHearts, 220);
+    });
+  }
+
+  // Tombol LANJUT handler
+  lanjutBtn.addEventListener('click', () => {
+    if(!opsLclick) return;
+    hideLanjut();
+    if(opsLstep===1){ step2(); }
+    else if(opsLstep===2){ step3(); }
+    else if(opsLstep===3){ step4(); }
+    else if(opsLstep===4){ step5(); }
+    else if(opsLstep===5){ step6(); }
+    else if(opsLstep===6){ step7(); }
+  });
+
+  // Tombol Balas (WA) -> pertanyaan
+  btnBy.addEventListener('click', async () => {
+    const tanya = 'Kangen Mas Irgi Ga? 😶❤️';
+    const opstanya = 'Ayo jawab 😆';
+    const tompositif = 'Kangen';
+    const tomnegatif = 'Engga';
+
+    const res = await swals.fire({
+      title: `${nama} ${tanya}`,
+      text: opstanya,
+      imageUrl: fotostiker2.src,
+      showCancelButton: true,
+      confirmButtonText: tompositif,
+      cancelButtonText: tomnegatif
+    });
+
+    if(res.isConfirmed){
+      pesanwhatsapp = `Iyaa ${nama} kangen kamu juga kok! ><`;
+      goWA();
+    }else{
+      pesanwhatsapp = `${nama} engga kangen kamu wleee! :p`;
+      await swalToast.fire({ title: kataditolak.innerHTML, timer: 2000, imageUrl: stikerditolak.src });
+      goWA();
+    }
+  });
+
+  async function goWA(){
+    await swals.fire('OK!', 'Kirim jawabannya ke WhatsApp aku, ya!', 'success');
+    window.location = `https://api.whatsapp.com/send?phone=6281229343431&text=${encodeURIComponent(pesanwhatsapp)}`;
+  }
+
+  // Hujan hati
+  function rainHearts(){
+    const heart = document.createElement('div');
+    heart.innerHTML = "<svg class='line spin' style='opacity:.5;z-index:100' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><g transform='translate(2.55,3.55)'><path d='M0.3717,8.8961 C-0.7013,5.5461 0.5537,1.3811 4.0707,0.2491 C5.9207,-0.3479 8.2037,0.1501 9.5007,1.9391 C10.7237,0.0841 13.0727,-0.3439 14.9207,0.2491 C18.4367,1.3811 19.6987,5.5461 18.6267,8.8961 C16.9567,14.2061 11.1297,16.9721 9.5007,16.9721 C7.8727,16.9721 2.0977,14.2681 0.3717,8.8961 Z'></path><path d='M13.2384,4.0138 C14.4454,4.1378 15.2004,5.0948 15.1554,6.4358'></path></g></svg>";
+    heart.className = 'heart-icon';
+    heart.style.left = (Math.random()*95) + 'vw';
+    heart.style.animationDuration = ((Math.random()*3)+2) + 's';
+    document.body.appendChild(heart);
+
+    const arr = document.querySelectorAll('.heart-icon');
+    if(arr.length>100){ arr[0].remove(); }
+  }
+})();
+</script>
 </body>
 </html>
